@@ -1,0 +1,202 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description"
+        content="Toggle contextual overlays for displaying lists of links and more with the Bootstrap dropdown plugin.">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Jekyll v3.8.5">
+
+    <meta name="docsearch:language" content="en">
+    <meta name="docsearch:version" content="4.3">
+
+    <title>ICLR 2020 Keyword Search</title>
+
+    <!-- Bootstrap core CSS -->
+    <style class="anchorjs"></style>
+    <link href="/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" language="javascript" src="iclr_2020.json"></script>
+    <script type="text/css" language="javascript">
+        .card {
+            width:100%;
+            margin-bottom: 5px;
+        }
+    </script>
+</head>
+
+<body style="margin:20px 100px">
+    <input type="search" class="form-control ds-input" id="search-input" placeholder="Search..."
+        aria-label="Search for..." autocomplete="off" data-docs-version="4.3" spellcheck="false" role="combobox"
+        aria-autocomplete="list" aria-expanded="false" aria-owns="algolia-autocomplete-listbox-0" dir="auto"
+        style="position: relative; vertical-align: top; width:50%; float:left; margin-right: 20px;">
+    <button type="button" class="btn btn-primary" onclick="show_search_results()">Search</button>
+
+    <div class="jumbotron" style="margin-top: 10; padding:10px ">
+        <div class="btp-group" id="keywords" role="group" aria-label="Basic example">
+
+        </div>
+        <br>
+        <button id="list_all" class="btn btn-primary btn-sm" href="#" role="button" , onclick="toggle_show_count()">List
+            all</a>
+    </div>
+    <h3 class="search-results-for"></h3>
+    <div class="search-results">
+
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.4.5/fuse.min.js"></script>
+
+
+    <script type='text/javascript'>
+        function sum(arr) {
+            return arr.reduce(function (a, b) { return a + b }) / arr.length
+        }
+
+        let options = {
+            shouldSort: false,
+            threshold: 0.1,
+            location: 0,
+            distance: 100000,
+            maxPatternLength: 32,
+            minMatchCharLength: 3,
+            keys: [
+                "title",
+                "tldr",
+                "abs",
+                "kw",
+            ]
+        };
+        let fuse = new Fuse(iclr, options); // "list" is the item array
+
+        let show_count = 100
+        function fireWhenReady() {
+            if (typeof iclr != 'undefined') {
+                // console.log("loaded iclr")
+                keywords = load_everything();
+
+                // # sort keywords and show first 100
+                show_keywords()
+
+            }
+            else {
+                setTimeout(fireWhenReady, 100);
+            }
+        }
+
+        function create_card(element) {
+            str = '<div class="card" style="margin-bottom:5px"> <div class="card-body" > <h5 class="card-title">'
+            str += element.title
+            str += '</h5 > <h6 class="card-subtitle mb-2 text-muted">'
+            str += element.tldr + "</h6>"
+            str += '<a target="_blank" href = "https://openreview.net/forum?id=' + element.id + '" class="card-link" > Link</a>'
+            str += '  Ratings: (' + element.ratings.join() + ")"
+            str += '<a href="#" class="card-link" data-toggle="collapse" data-target=#collapse' + element.id + '> Abstract </a>'
+            str += '<div class="collapse" id="collapse' + element.id + '">'
+            str += '<div class="card card-body">' + element.abs + "</div>"
+            str += "</div >"
+            str += "</div >"
+            return str
+        }
+
+        function show_results_on_click(that) {
+            text = that.id
+            results = []
+            for (let i in iclr) {
+                if (iclr[i].kw.includes(text)) {
+                    results.push(iclr[i])
+                }
+            }
+
+
+            display_results(results)
+
+        }
+
+        function display_results(results) {
+            var aTag = $(".search-results");
+            jQuery('html,body').animate({ scrollTop: aTag.offset().top }, 'slow');
+            jQuery(".search-results-for").empty()
+
+            jQuery(".search-results").empty()
+
+            results.sort(function (a, b) { return sum(b.ratings) - sum(a.ratings) })
+
+            for (let i in results) {
+                jQuery(".search-results").append(
+                    create_card(results[i])
+                )
+            }
+            jQuery(".search-results-for").text(text + " (" + results.length + " results)")
+
+        }
+
+        function show_search_results() {
+            text = jQuery("#search-input")[0].value
+            if (text.length > 3) {
+                let results = fuse.search(text)
+                display_results(results)
+            } else {
+                jQuery(".search-results-for").empty()
+                jQuery(".search-results").empty()
+            }
+        }
+        $('#search-input').on('keypress', function (e) {
+            if (e.which == 13) {
+                show_search_results()
+            }
+        });
+
+        function show_keywords() {
+            jQuery("#keywords").empty()
+            for (let i in keywords) {
+                if (i < show_count) {
+                    jQuery("#keywords").append(
+                        '<button type="button" class="badge badge-info" data-toggle="tooltip" data-placement="bottom" onclick="show_results_on_click(this)" id="' + keywords[i].text + '" title="' + keywords[i].count + ' ">' + keywords[i].text + '</button>'
+                    )
+                }
+            }
+        }
+
+        function toggle_show_count() {
+            if (show_count > 100) {
+                show_count = 100
+                jQuery("#list_all").text("List all")
+            } else {
+                show_count = 10000
+                jQuery("#list_all").text("List few")
+            }
+            show_keywords()
+        }
+
+
+        function load_everything() {
+            // get list of keyword first and count
+            keywords = {}
+            for (let i in iclr) {
+                kw = iclr[i]["kw"]
+                for (let j in kw) {
+                    if (keywords[kw[j]] == undefined) {
+                        keywords[kw[j]] = 1
+                    }
+                    else {
+                        keywords[kw[j]] += 1
+                    }
+                }
+            }
+            kw_arr = []
+            for (let key in keywords)
+                kw_arr.push({ text: key, count: keywords[key] })
+            kw_arr = kw_arr.sort(function (a, b) { return b.count - a.count })
+            // console.log(kw_arr)
+            return kw_arr
+        }
+
+        $(document).ready(fireWhenReady);
+    </script>
+</body>
+
+
+</html>
