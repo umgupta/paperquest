@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description"
-        content="Toggle contextual overlays for displaying lists of links and more with the Bootstrap dropdown plugin.">
+    <meta name="description" content="ICLR 2020 papers empowered with keyword filtering and sorted by ratings">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.5">
 
@@ -17,16 +16,15 @@
     <style class="anchorjs"></style>
     <link href="dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" language="javascript" src="iclr_2020.json"></script>
-    <script type="text/css" language="javascript">
+    <style>
         .card {
-            width:100%;
+            width: 100%;
             margin-bottom: 5px;
         }
-    </script>
+    </style>
 </head>
 
-<body style="margin:20px 100px">
-    <a href="https://github.com/umgupta/iclr2020keywordsearch" class="github-corner"
+<body style="margin:20px 100px"><a href="https://github.com/umgupta/iclr2020keywordsearch" class="github-corner"
         aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250"
             style="fill:#70B7FD; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true">
             <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -78,7 +76,7 @@
     <button type="button" class="btn btn-primary" onclick="show_search_results()">Search</button>
 
     <div class="jumbotron" style="margin-top: 10; padding:10px ">
-        <div class="btp-group" id="keywords" role="group" aria-label="Basic example">
+        <div class="badge-group" id="keywords" role="group" aria-label="Basic example">
 
         </div>
         <br>
@@ -106,7 +104,7 @@
             location: 0,
             distance: 100000,
             maxPatternLength: 32,
-            minMatchCharLength: 3,
+            minMatchCharLength: 1,
             keys: [
                 "title",
                 "tldr",
@@ -124,7 +122,7 @@
 
                 // # sort keywords and show first 100
                 show_keywords()
-                display_results(iclr)
+                display_results(iclr, "")
 
             }
             else {
@@ -155,11 +153,11 @@
                     results.push(iclr[i])
                 }
             }
-            display_results(results)
+            display_results(results, text)
 
         }
 
-        function display_results(results) {
+        function display_results(results, text) {
             var aTag = $(".search-results");
             jQuery('html,body').animate({ scrollTop: aTag.offset().top }, 'slow');
             jQuery(".search-results-for").empty()
@@ -173,15 +171,15 @@
                     create_card(results[i])
                 )
             }
-            jQuery(".search-results-for").text(text + " (" + results.length + " results)")
+            jQuery(".search-results-for").html(text + " (" + results.length + " results)")
 
         }
 
         function show_search_results() {
             text = jQuery("#search-input")[0].value
-            if (text.length > 3) {
+            if (text.length > 0) {
                 let results = fuse.search(text)
-                display_results(results)
+                display_results(results, text)
             } else {
                 jQuery(".search-results-for").empty()
                 jQuery(".search-results").empty()
