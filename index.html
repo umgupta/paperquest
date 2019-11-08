@@ -21,6 +21,12 @@
             width: 100%;
             margin-bottom: 5px;
         }
+
+        .badge {
+            margin: 2px;
+            font-size: 90%;
+            font-weight: 300;
+        }
     </style>
 </head>
 
@@ -76,6 +82,7 @@
     <button type="button" class="btn btn-primary" onclick="show_search_results()">Search</button>
 
     <div class="jumbotron" style="margin-top: 10; padding:10px; background-color:#fff; ">
+        <div style="margin-top:-10px"> Keywords</div>
         <div class="badge-group" id="keywords" role="group" aria-label="Basic example">
 
         </div>
@@ -196,7 +203,7 @@
             for (let i in keywords) {
                 if (i < show_count) {
                     jQuery("#keywords").append(
-                        '<button type="button" class="badge badge-dark" data-toggle="tooltip" data-placement="bottom" onclick="show_results_on_click(this)" id="' + keywords[i].text + '" title="' + keywords[i].count + ' ">' + keywords[i].text + '</button>'
+                        '<button type="button" class="badge badge-light" data-toggle="tooltip" data-placement="bottom" onclick="show_results_on_click(this)" id="' + keywords[i].text + '" title="' + keywords[i].count + ' ">' + keywords[i].text + '</button>'
                     )
                 }
             }
